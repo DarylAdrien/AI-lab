@@ -12,46 +12,55 @@ class Node:
 
 def ao_star(graph, start_node_name, goal_node_name):
     """
-    Solves the problem using the AO* algorithm.
+    Solves the problem using the AO* algorithm with intermediate step printing.
     """
     
-    # Stores the optimal path to each node
     optimal_path = {}
     
     # Priority queue: (f_cost, node_name)
     frontier = [(heuristic_costs.get(start_node_name, 0), start_node_name)]
     
-    # Stores the g_cost (cost from start)
     g_cost = {start_node_name: 0}
     
+    print("\n--- AO* Algorithm Trace ---")
+    step_count = 0
+
     while frontier:
+        step_count += 1
+        
+        # Pop the node with the lowest f_cost
         f_cost, current_node_name = heapq.heappop(frontier)
         
+        print(f"\nStep {step_count}: Popping node '{current_node_name}' with f_cost = {f_cost}")
+        print(f"  Current g_cost is {g_cost[current_node_name]}")
+        
         if current_node_name == goal_node_name:
+            print("Goal node reached!")
             return optimal_path, g_cost[current_node_name]
             
         current_node = graph[current_node_name]
         
         # If it's an AND node, we need to solve all subproblems
         if current_node.is_and:
-            total_g_cost_for_and = 0
-            
-            # Recalculate f_cost for the AND node based on its neighbors
+            print(f"  Node '{current_node_name}' is an AND node. Recalculating costs for its neighbors.")
             new_f_cost = 0
             for neighbor_name in current_node.neighbors:
-                # The cost of an AND node is the sum of costs of all its subproblems
-                # We add 1 for the cost to traverse the edge to each subproblem
-                g_cost[neighbor_name] = g_cost[current_node_name] + 1
-                new_f_cost += g_cost[neighbor_name] + heuristic_costs.get(neighbor_name, 0)
+                new_g_cost = g_cost[current_node_name] + 1
+                g_cost[neighbor_name] = new_g_cost
+                h_cost = heuristic_costs.get(neighbor_name, 0)
+                new_f_cost += new_g_cost + h_cost
+                print(f"    - Neighbor: '{neighbor_name}' - g_cost: {new_g_cost}, h_cost: {h_cost}")
                 
-            # If the new path is better, update and push to frontier
             if new_f_cost < f_cost:
-                 heapq.heappush(frontier, (new_f_cost, current_node_name))
+                print(f"  New f_cost for '{current_node_name}' is {new_f_cost}. Pushing back to frontier.")
+                heapq.heappush(frontier, (new_f_cost, current_node_name))
 
         # If it's an OR node, we choose the best path
         else:
+            print(f"  Node '{current_node_name}' is an OR node. Exploring neighbors:")
             for neighbor_name in current_node.neighbors:
                 new_g_cost = g_cost[current_node_name] + 1
+                print(f"    - Considering neighbor: '{neighbor_name}'")
                 
                 if neighbor_name not in g_cost or new_g_cost < g_cost[neighbor_name]:
                     g_cost[neighbor_name] = new_g_cost
@@ -60,6 +69,13 @@ def ao_star(graph, start_node_name, goal_node_name):
                     heapq.heappush(frontier, (f_cost, neighbor_name))
                     optimal_path[neighbor_name] = current_node_name
                     
+                    print(f"      Path to '{neighbor_name}' is improved/new. Updating costs:")
+                    print(f"      g_cost = {new_g_cost}, h_cost = {h_cost}, f_cost = {f_cost}")
+                    print(f"      Pushing to frontier: ({f_cost}, '{neighbor_name}')")
+                else:
+                    print(f"      Path to '{neighbor_name}' is not an improvement. Skipping.")
+            
+    print("\nNo solution found.")
     return None, None
 
 def get_dynamic_input():
