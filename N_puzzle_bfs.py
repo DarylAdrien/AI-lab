@@ -1,4 +1,29 @@
-from collections import deque
+def bfs_n_puzzle(initial_state, goal_state):
+    if not is_solvable(initial_state):
+        return None, "This puzzle is unsolvable."
+    
+    queue = deque([(initial_state, [])]) # (state, path)
+    visited = {initial_state}
+    step_count = 0
+
+    while queue:
+        current_state, path = queue.popleft()
+        step_count += 1
+        
+        print(f"\nProcessing Step {step_count}:")
+        for row in current_state:
+            print(row)
+        
+        if current_state == goal_state:
+            return path + [current_state], "Solution found!"
+
+        for neighbor in get_neighbors(current_state):
+            if neighbor not in visited:
+                visited.add(neighbor)
+                new_path = path + [current_state]
+                queue.append((neighbor, new_path))
+                
+    return None, "Solution not found (shouldn't happen for solvable puzzles)."
 
 def get_inversions(puzzle):
     inversions = 0
@@ -46,27 +71,6 @@ def get_neighbors(state):
             neighbors.append(tuple(tuple(row) for row in new_state))
             
     return neighbors
-
-def bfs_n_puzzle(initial_state, goal_state):
-    if not is_solvable(initial_state):
-        return None, "This puzzle is unsolvable."
-    
-    queue = deque([(initial_state, [])]) # (state, path)
-    visited = {initial_state}
-
-    while queue:
-        current_state, path = queue.popleft()
-        
-        if current_state == goal_state:
-            return path + [current_state], "Solution found!"
-
-        for neighbor in get_neighbors(current_state):
-            if neighbor not in visited:
-                visited.add(neighbor)
-                new_path = path + [current_state]
-                queue.append((neighbor, new_path))
-                
-    return None, "Solution not found (shouldn't happen for solvable puzzles)."
 
 def get_dynamic_input():
     try:
