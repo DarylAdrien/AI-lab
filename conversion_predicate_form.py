@@ -40,9 +40,8 @@ def convert_to_predicate_form(sentence):
 
 # Sample Input and Output
 sentences = [
-    "All men are mortal.",
-    "Socrates is a man.",
-    "A cat is on the mat."
+    "Apple and vegetables are food.",
+    "John likes all kind of food.",
 ]
 
 print("--- Conversion to Predicate Form ---")
